@@ -66,8 +66,7 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # Create a k-NN classifier with the desired number of neighbors
-#knn_classifier = KNeighborsClassifier(n_neighbors=3)  # You can adjust 'n_neighbors' as needed
-knn_classifier= SVC()
+knn_classifier = KNeighborsClassifier(n_neighbors=3)  # You can adjust 'n_neighbors' as needed
 
 # Train the k-NN classifier
 knn_classifier.fit(X_train, y_train)
