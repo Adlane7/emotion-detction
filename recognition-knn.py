@@ -4,8 +4,10 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+
 import joblib
 
 # Define the base path for the image data
@@ -14,6 +16,10 @@ base_path = "images/"
 # Initialize lists to store feature vectors (X) and labels (y)
 X = []
 y = []
+
+# Data augmentation parameters
+data_augmentation = True  # Set this to True to enable data augmentation
+augmentation_factor = 2  # Number of augmented images per original image
 
 # Process training and validation data
 for dataset_type in ["train", "validation"]:
@@ -24,10 +30,24 @@ for dataset_type in ["train", "validation"]:
         for image_file in os.listdir(expression_path):
             image_path = os.path.join(expression_path, image_file)
             image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Load the image in grayscale
+
             # Preprocess the image as needed (resize, normalize, etc.)
-            # Flatten the image and append it to X
-            X.append(image.flatten())
-            y.append(label)
+            image = cv2.resize(image, (48, 48))  # Resize to a common size
+            image = cv2.equalizeHist(image)  # Apply histogram equalization
+            image = image / 255.0  # Normalize pixel values
+
+            # Augment the data if enabled
+            if data_augmentation:
+                augmented_images = [image]
+                for _ in range(augmentation_factor):
+                    augmented = cv2.flip(image, 1)  # Horizontal flip
+                    augmented_images.append(augmented)
+                for augmented in augmented_images:
+                    X.append(augmented.flatten())
+                    y.append(label)
+            else:
+                X.append(image.flatten())
+                y.append(label)
 
 # Convert the lists to NumPy arrays for further processing
 X = np.array(X)
@@ -46,7 +66,8 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # Create a k-NN classifier with the desired number of neighbors
-knn_classifier = KNeighborsClassifier(n_neighbors=5)  # You can adjust 'n_neighbors' as needed
+#knn_classifier = KNeighborsClassifier(n_neighbors=3)  # You can adjust 'n_neighbors' as needed
+knn_classifier= SVC()
 
 # Train the k-NN classifier
 knn_classifier.fit(X_train, y_train)
@@ -65,4 +86,3 @@ print("Classification Report:\n", report)
 joblib.dump(knn_classifier, 'knn_model.pkl')
 joblib.dump(label_encoder, 'label_encoder.pkl')
 joblib.dump(scaler, 'scaler.pkl')
-s

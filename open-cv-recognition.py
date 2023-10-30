@@ -25,6 +25,12 @@ while True:
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     for (x, y, w, h) in faces:
+        # Increase the size of the bounding box
+        x -= 10  # Move the left edge to the left
+        y -= 10  # Move the top edge upward
+        w += 20  # Increase the width
+        h += 20  # Increase the height
+
         # Draw a bounding box around the face
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
